@@ -1,9 +1,12 @@
 from rest_framework import generics
 from thanimaBackend.helpers import GenericResponse
+from rest_framework.permissions import IsAdminUser
 from django.contrib.auth import get_user_model
 
 
 class EntryCheckView(generics.GenericAPIView):
+    permission_classes=[IsAdminUser]
+
     def get(self, request, *args, **kwargs):
         reg_no = request.GET.get('reg_no', None)
         if reg_no is None:
@@ -15,6 +18,7 @@ class EntryCheckView(generics.GenericAPIView):
         except Exception as e:
             return GenericResponse("",{"entry": False})
 class HadFood(generics.GenericAPIView):
+    permission_classes = [IsAdminUser]
     def get(self,request,*args,**kwargs):
         reg_no = request.GET.get('reg_no', None)
         if reg_no is None:
