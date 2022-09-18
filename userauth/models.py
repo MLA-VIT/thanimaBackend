@@ -15,6 +15,8 @@ class User(AbstractUser):
     gender = models.CharField(max_length=10, choices=[("Male", "Male"), ("Female", "Female"), ("Other", "Other")])
     username = models.CharField(max_length=128, default=uuid.uuid4, editable=False)
     verification_id = models.TextField()
+    payment_done = models.BooleanField(default=False)
+    had_food = models.BooleanField(default=False)
     otp_validity = models.DateTimeField(null=True)
     verification_validity = models.DateTimeField(null=True)
     reg_complete = models.BooleanField(default=False)
