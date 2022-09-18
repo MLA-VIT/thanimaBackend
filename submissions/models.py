@@ -25,6 +25,7 @@ class Event(models.Model):
             models.CharField(max_length=10, choices=[("Male", "Male"), ("Female", "Female")]),
             size=2
         )
+    deadline = models.DateTimeField(null=True)
 
 
 class Participant(models.Model):
@@ -39,3 +40,8 @@ class Teams(models.Model):
     team_name = models.CharField(max_length=50)
     events = models.ManyToManyField(Event)
     members = models.ManyToManyField(Participant)
+class Submission(models.Model):
+    event = models.ForeignKey(Event,on_delete= models.CASCADE)
+    participant = models.ForeignKey(Participant,on_delete=models.CASCADE)
+    file = models.TextField()
+    

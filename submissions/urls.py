@@ -3,5 +3,6 @@ from .views import *
 
 urlpatterns = [
     path('',AllEventsView.as_view()),
-    path('add/',CreateEventView.as_view())
+    path('add/',CreateEventView.as_view()),
+    path('submit/',CreateSubmissionView.as_view())
 ]
