@@ -1,6 +1,5 @@
-from tkinter import Entry
 from rest_framework import generics
-from userauth.utils import GenericResponse
+from thanimaBackend.helpers import GenericResponse
 from django.contrib.auth import get_user_model
 
 
