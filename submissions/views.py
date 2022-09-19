@@ -12,8 +12,6 @@ from django.conf import settings
 from django.core.files.storage import default_storage
 from django.contrib import messages
 import pyrebase
-import os
-
 
 firebase = pyrebase.initialize_app(settings.FIREBASE_CONFIG)
 storage = firebase.storage()
@@ -32,20 +30,25 @@ class CreateEventView(generics.CreateAPIView):
     permission_classes = [IsAdminUser]
 
     def post(self, request, *args, **kwargs):
-        response = super().create(self, request, *args, **kwargs)
+        response = super().create(request, *args, **kwargs)
         return GenericResponse("success",response.data)
 
-class CreateSubmissionView(generics.CreateAPIView):
+class CreateSubmissionView(generics.GenericAPIView):
+    serializer_class = SubmissionSerializer
+    permission_classes = [IsAuthenticated]
 
     def submit_file(self, file, filename, accepted_formats):
         ext = file.name.split('.')[-1]
         filename = f"{filename}.{ext}"
-        if ext in accepted_formats:
-            file_save = default_storage.save(filename, file)
-            url = storage.child("files/" + filename).put("submissions/" + filename).get_url()
-            print(url)
-            delete = default_storage.delete(filename)
+        if ext.upper() in accepted_formats:
+            file_save = default_storage.save(f'file_uploads/{filename}', file)
+            filename = "submissions/" + file_save.split('/')[-1]
+            result = storage.child(filename).put(file_save)
+            url = storage.child(filename).get_url(None)
+            delete = default_storage.delete(file_save)
             return url
+        else:
+            raise Exception(400, 'invalid file format')
 
     def post(self, request,*args, **kwargs):
         participant = Participant.objects.get(user_id = request.user.id)
@@ -56,14 +59,12 @@ class CreateSubmissionView(generics.CreateAPIView):
         if event.file_submission: # File Submission
             file = request.FILES.get('file', None)
             if file is None:
-                print(request.FILES)
                 raise Exception(422, "file submission expected, but not received.")
-            print(file)
-            url = self.submit_file(file, request.user.reg_no, event.accepted_formats)
+            url = self.submit_file(file, f"{event.id}_{request.user.reg_no}", event.accepted_formats)
         else: # Link Submission
             url_rx = r"^(http(s)?:\/\/)[\w.-]+(?:\.[\w\.-]+)+[\w\-\._~:/?#[\]@!\$&'\(\)\*\+,;=.]+$"
             url = request.data.get('file', None)
-            if url is None:
+            if url is None or type(url) is not str:
                 raise Exception(422, 'link submission expected, but not received.')
             if re.search(url_rx, url) is None:
                 raise Exception(422, 'invalid URL passed.')
@@ -73,4 +74,16 @@ class CreateSubmissionView(generics.CreateAPIView):
         except Submission.DoesNotExist:
             submission = Submission(event = event, file = url,participant = participant)
         submission.save()
-        return GenericResponse("success",submission)
+        return GenericResponse("success",SubmissionSerializer(submission).data)
+
+class GetSubmissionsView(generics.ListAPIView):
+    serializer_class = SubmissionSerializer
+    lookup_field = 'event'
+    permission_classes = [IsAdminUser]
+
+    def get_queryset(self):
+        return Submission.objects.filter(event__id=self.kwargs['event'])
+
+    def post(self, request,*args, **kwargs):
+        response = super().list(self, request, *args, **kwargs)
+        return GenericResponse("success",response.data)

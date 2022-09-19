@@ -1,7 +1,7 @@
 from rest_framework.response import Response
 
-def GenericResponse(response, data, status = 200):
+def GenericResponse(message, data, status = 200):
     return Response({
-    "message": response,
+    "message": message,
     "data": data,
     "status": status }, status=status)
