@@ -9,8 +9,7 @@ https://docs.djangoproject.com/en/4.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.0/ref/settings/
 """
-
-import django_heroku
+import dj_database_url
 from pathlib import Path
 import environ
 import os
@@ -129,14 +128,7 @@ WSGI_APPLICATION = 'thanimaBackend.wsgi.application'
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
 
 DATABASES = {
-   'default': {
-       'ENGINE': 'django.db.backends.postgresql',
-       'NAME': env('PG_DB_NAME'),
-       'USER': env('PG_DB_USER'),
-       'PASSWORD': env('PG_DB_PASSWORD'),
-       'HOST': env('PG_DB_HOST'),
-       'PORT': env('PG_DB_PORT'),
-   }
+    'default': dj_database_url.config(default='postgres://postgres:postgres@localhost:5432/thanima2020')
 }
 
 
