@@ -10,12 +10,15 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.0/ref/settings/
 """
 
+import django_heroku
 from pathlib import Path
 import environ
 import os
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# django_heroku.settings(locals())
 env = environ.Env()
 environ.Env.read_env(env_file=os.path.join(BASE_DIR, ".env"))
 
@@ -34,7 +37,6 @@ ALLOWED_HOSTS = ['127.0.0.1','localhost',env('SERVER_HOST')]
 # Application definition
 
 INSTALLED_APPS = [
-  
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -54,7 +56,6 @@ INSTALLED_APPS = [
     'allauth.socialaccount',
     'allauth.socialaccount.providers.google',
     'dj_rest_auth.registration'
-    
 ]
 
 MIDDLEWARE = [
@@ -157,6 +158,16 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+# Firebase Configuration
+FIREBASE_CONFIG = {
+  "apiKey": "AIzaSyDjsYpNpfsXkwJOyJfZ1p7JR0Y4-g7MCtM",
+  "authDomain": "thanima2022-2a1ee.firebaseapp.com",
+  "projectId": "thanima2022-2a1ee",
+  "storageBucket": "thanima2022-2a1ee.appspot.com",
+  "messagingSenderId": "547248904283",
+  "appId": "1:547248904283:web:b7c8bca1c2d7fb70cbc77e",
+  "databaseURL":""
+}
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.0/topics/i18n/

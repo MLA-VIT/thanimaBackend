@@ -16,7 +16,8 @@ class Event(models.Model):
     description = models.TextField()
     rules = models.TextField()
     judging_criteria = models.TextField()
-   # result = models.ForeignKey(Result, on_delete= models.CASCADE)     
+    #result = models.ForeignKey(Result, on_delete= models.CASCADE)     
+    prize_reveal = models.BooleanField(default=False)
     prize_1 = models.IntegerField()
     prize_2 = models.IntegerField()
     prize_3 = models.IntegerField()
@@ -26,20 +27,25 @@ class Event(models.Model):
             size=2
         )
     deadline = models.DateTimeField(null=True)
+    file_submission = models.BooleanField(default=False)
+    accepted_formats = ArrayField(
+            models.CharField(max_length=10, choices=[("TIFF","TIFF"), ("JPEG", "JPEG"), ("PNG", "PNG"), ("JPG", "JPG")])
+        )
 
 
 class Participant(models.Model):
-    participant_id = models.CharField(max_length= 5 ,primary_key=True)
-    user_id = models.ForeignKey(User, on_delete= models.CASCADE)
+    participant_id = models.CharField(max_length= 10 ,primary_key=True)
+    reg_no = models.CharField(max_length=15)
+    user = models.ForeignKey(User, on_delete= models.CASCADE)
     events = models.ManyToManyField(Event)
     remarks = models.CharField(max_length= 200)
-    prize_reveal = models.BooleanField(default=False)
 
 class Teams(models.Model):
     team_id = models.CharField(max_length=5 ,primary_key=True)
     team_name = models.CharField(max_length=50)
     events = models.ManyToManyField(Event)
     members = models.ManyToManyField(Participant)
+
 class Submission(models.Model):
     event = models.ForeignKey(Event,on_delete= models.CASCADE)
     participant = models.ForeignKey(Participant,on_delete=models.CASCADE)

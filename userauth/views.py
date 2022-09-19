@@ -22,16 +22,20 @@ class CustomRegisterView(generics.GenericAPIView):
             otp = create_otp()
             email = user_data.validated_data.get('email', None)
             password = user_data.validated_data.get('password', None)
-            send_mail('Verification Mail for Thanima Portal', otp_msg(otp), None, recipient_list=[email], fail_silently=True)
             otp_validity = datetime.now() + timedelta(minutes=10)
             user = user_data.user_exists()
             if user is not None:
+                if user.otp_validity:
+                    time_diff = user.otp_validity.replace(tzinfo=None) - datetime.now()
+                if time_diff.seconds > 480 and time_diff.seconds < 600:
+                    raise Exception(429, 'otp already requested in last 2 minutes.')
                 user.otp = otp
                 user.password = make_password(password)
                 user.otp_validity = otp_validity
                 user.save()
             else:
                 user_data.save(otp=otp, otp_validity=otp_validity, password=make_password(password))
+            send_mail('Verification Mail for Thanima Portal', otp_msg(otp), None, recipient_list=[email], fail_silently=True)
             return GenericResponse('Registered. OTP Sent.','Success')
 
 class OTPVerifyView(LoginView):
@@ -41,8 +45,7 @@ class OTPVerifyView(LoginView):
     def get_response(self):
         response = super().get_response()
         if response is not None:
-            response.data['message'] = 'OTP Verified Successfully'
-            return GenericResponse(response.data, "Success")
+            return GenericResponse("Logged in successfully", response.data)
         else:
             raise Exception(500, 'failed to create response')
 
@@ -87,10 +90,10 @@ class ForgotPasswordRequest(generics.GenericAPIView):
     permission_classes = []
 
     def post(self, request, *args, **kwargs):
-        contact = request.data.get('contact', None)
-        if contact is None:
-            raise Exception(422, 'contact not passed')
-        user = get_user_model().objects.get(contact=contact, reg_complete=True)
+        email = request.data.get('email', None)
+        if email is None:
+            raise Exception(422, 'email not passed')
+        user = get_user_model().objects.get(email=email, reg_complete=True)
         if user.otp_validity:
             time_diff =  user.otp_validity.replace(tzinfo=None) - datetime.now()
             if time_diff.seconds > 480 and time_diff.seconds < 600:
@@ -106,13 +109,13 @@ class VerifyForgotPasswordOTP(generics.GenericAPIView):
     permission_classes = []
 
     def post(self, request, *args, **kwargs):
-        contact = request.data.get('contact', None)
+        email = request.data.get('email', None)
         otp = request.data.get('otp', None)
-        if contact is None:
-            raise Exception('contact not passed')
+        if email is None:
+            raise Exception('email not passed')
         if otp is None:
             raise Exception('otp not passed')
-        user = get_user_model().objects.get(contact=contact, reg_complete=True)
+        user = get_user_model().objects.get(email=email, reg_complete=True)
         time_diff = user.otp_validity.replace(tzinfo=None) - datetime.now()
         if(time_diff.seconds <= 600): 
             if(user.otp == otp): # otp valid

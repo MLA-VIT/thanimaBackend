@@ -6,6 +6,8 @@ from dj_rest_auth.serializers import LoginSerializer
 from datetime import datetime
 import re
 
+from submissions.models import Participant
+
 GENDER_CHOICES = [('Male','Male'),('Female','Female'),('Other','Other')]
 
 class CustomRegisterSerializer(serializers.Serializer):
@@ -86,32 +88,45 @@ class CustomLoginSerializer(LoginSerializer):
         return self.authenticate(email=email, password=password)
 
 class OTPSerializer(serializers.Serializer):
-    otp = serializers.CharField(required=True, allow_blank=False, max_length=4)
+    otp = serializers.CharField(required=True, allow_blank=False, max_length=6)
     email = serializers.CharField(required=True, allow_blank=False, max_length=128)
+    
+    def create_participant(self, user):
+        last = Participant.objects.all().order_by('participant_id').last()
+        if not last:
+            pid = 'TMAP0001'
+        else:
+            last_id = int(last.split('P'))
+            pid = 'TMAP' + str(last_id+1).zfill(4)
+        participant = Participant(user=user,participant_id=pid,reg_no=user.reg_no)
+        print(participant)
+        participant.save()
 
-    def _validate_otp(self, otp, contact):
-        if otp and contact:
+    def _validate_otp(self, otp, email):
+        if otp and email:
             UserModel = get_user_model()
-            user = UserModel.objects.get(contact=contact)
+            user = UserModel.objects.get(email=email)
             if user is None:
                 raise exceptions.ObjectDoesNotExist(_('User does not exist.'))
             time_diff = user.otp_validity.replace(tzinfo=None) - datetime.now()
             if(time_diff.seconds <= 600): # otp valid
                 if(user.otp == otp):
-                    if(user.contact_verified == False):
-                        user.contact_verified = True
+                    if(user.email_verified == False):
+                        user.email_verified = True
                         user.save()
+                        # Create Participant Automatically
+                        self.create_participant(user)
                     return user
                 else:
                     raise exceptions.PermissionDenied(_('Invalid OTP'))
             else:
                 raise exceptions.PermissionDenied(_('OTP Timed Out'))
         else:
-            raise exceptions.BadRequest(_('Both "otp" and "contact" should be provided.'))
+            raise exceptions.BadRequest(_('Both "otp" and "email" should be provided.'))
     
     def validate(self, attrs):
         otp = attrs.get('otp')
-        contact = attrs.get('contact')
-        user = self._validate_otp(otp, contact)
+        email = attrs.get('email')
+        user = self._validate_otp(otp, email)
         attrs['user'] = user
         return attrs
