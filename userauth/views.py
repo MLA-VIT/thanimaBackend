@@ -31,6 +31,16 @@ class RootView(APIView):
 class CustomRegisterView(generics.GenericAPIView):
     serializer_class = CustomRegisterSerializer
 
+    def create_participant(self, user):
+        last = Participant.objects.all().order_by('participant_id').last()
+        if not last:
+            pid = 'TMAP0001'
+        else:
+            last_id = int(last.split('P'))
+            pid = 'TMAP' + str(last_id+1).zfill(4)
+        participant = Participant(user=user,participant_id=pid,reg_no=user.reg_no)
+        participant.save()
+
     def post(self, request, *args, **kwargs):
         user_data = self.get_serializer(data=request.data)
         user_data.is_valid(raise_exception=True)
@@ -48,7 +58,10 @@ class CustomRegisterView(generics.GenericAPIView):
                 user.otp = otp
                 user.password = make_password(password)
                 user.otp_validity = otp_validity
+                user.email_verified = True
+                user.reg_complete = True
                 user.save()
+                self.create_participant(user)
             else:
                 user_data.save(otp=otp, otp_validity=otp_validity, password=make_password(password))
             send_mail('Verification Mail for Thanima Portal', otp_msg(otp), None, recipient_list=[email], fail_silently=True)
