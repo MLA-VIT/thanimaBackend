@@ -36,7 +36,7 @@ class CustomRegisterView(generics.GenericAPIView):
         if not last:
             pid = 'TMAP0001'
         else:
-            last_id = int(last.participant_id.split('P'))
+            last_id = int(last.participant_id.split('P')[1])
             pid = 'TMAP' + str(last_id+1).zfill(4)
         participant = Participant(user=user,participant_id=pid,reg_no=user.reg_no)
         print(participant)
