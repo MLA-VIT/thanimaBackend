@@ -36,9 +36,10 @@ class CustomRegisterView(generics.GenericAPIView):
         if not last:
             pid = 'TMAP0001'
         else:
-            last_id = int(last.split('P'))
+            last_id = int(last.participant_id.split('P'))
             pid = 'TMAP' + str(last_id+1).zfill(4)
         participant = Participant(user=user,participant_id=pid,reg_no=user.reg_no)
+        print(participant)
         participant.save()
 
     def post(self, request, *args, **kwargs):
@@ -53,8 +54,8 @@ class CustomRegisterView(generics.GenericAPIView):
             if user is not None:
                 if user.otp_validity:
                     time_diff = user.otp_validity.replace(tzinfo=None) - datetime.now()
-                if time_diff.seconds > 480 and time_diff.seconds < 600:
-                    raise Exception(429, 'otp already requested in last 2 minutes.')
+                # if time_diff.seconds > 480 and time_diff.seconds < 600:
+                #     raise Exception(429, 'otp already requested in last 2 minutes.')
                 user.otp = otp
                 user.password = make_password(password)
                 user.otp_validity = otp_validity
@@ -63,7 +64,8 @@ class CustomRegisterView(generics.GenericAPIView):
                 user.save()
                 self.create_participant(user)
             else:
-                user_data.save(otp=otp, otp_validity=otp_validity, password=make_password(password))
+                user = user_data.save(otp=otp, otp_validity=otp_validity, password=make_password(password))
+                self.create_participant(user)
             send_mail('Verification Mail for Thanima Portal', otp_msg(otp), None, recipient_list=[email], fail_silently=True)
             return GenericResponse('Registered. OTP Sent.','Success')
 

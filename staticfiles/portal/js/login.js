@@ -1,6 +1,6 @@
 /*global $, document, window, setTimeout, navigator, console, location*/
-var backendUrl = 'https://thanima-backend.herokuapp.com';
-
+// var backendUrl = 'https://thanima-backend.herokuapp.com';
+var backendUrl = 'http://localhost:8000';
 function setCookie(cname, cvalue, exdays) {
   const d = new Date();
   d.setTime(d.getTime() + (exdays*24*60*60*1000));
@@ -55,7 +55,7 @@ function register() {
       console.log('sup');
       setCookie("token",result.data.token, 3);
       console.log(document.cookie);
-      window.location.replace(`http://${window.location.host}/profile/`);
+      location.reload();
     } else {
       alert(result.message);
     }
