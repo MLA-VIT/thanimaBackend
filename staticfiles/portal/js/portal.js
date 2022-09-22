@@ -1,5 +1,5 @@
-var backendUrl = 'https://thanima-backend.herokuapp.com';
-// var backendUrl = 'http://localhost:8000';
+// var backendUrl = 'https://thanima-backend.herokuapp.com';
+var backendUrl = 'http://localhost:8000';
 var submissions = {};
 
 function getCookie(cname) {
@@ -41,26 +41,25 @@ function renderContestDiv(event) {
             <h2 class="open">OPEN</h2></div></div>`;
         }
     if (submissions[event.id]) {//already submitted
-        output += `<div class="submission" id="uploaded-${event.id}">
+        output += `<div class="submission" id="upload-${event.id}">
                     <a href="${submissions[event.id].file}" target="_blank">VIEW YOUR SUBMISSION</a>
                 </div>`;
     } else if(deadline >= Date.now()){//can submit
         if (event.file_submission) {
             output +=
-                `<div class="submission">
-                <input type="file" name="file" id="file-${event.id}">
-                <button type="button" onclick="submitFile(${event.id})">Submit</button>
-            </div>`;
+                `<div class="submission" id="upload-${event.id}">
+                    <input type="file" name="file" id="file-${event.id}">
+                    <button type="button" onclick="submitFile(${event.id})">Submit</button>
+                </div>`;
         } else {
             output +=
-                `
-                <div class="submission" id="upload-${event.id}">
-                <div class="submit-alert submission" >Upload your video in Google Drive (without any restriction -
+                `<div class="submit-alert submission" >Upload your video in Google Drive (without any restriction -
                     Edit the permission to "Anyone with the link can view") and paste the link below. Only the first
                     link uploaded will be considered. So please be careful while uploading.</div>
-                <input type="text" name="file" id="file-${event.id}" placeholder="File Hosted Link">
-                <button type="button" onclick="submitLink(${event.id})">Submit</button>
-            </div>`;
+                <div class="submission" id="upload-${event.id}">
+                    <input type="text" name="file" id="file-${event.id}" placeholder="File Hosted Link">
+                    <button type="button" onclick="submitLink(${event.id})">Submit</button>
+                </div>`;
         }
     }
     output += `</div>`;
@@ -85,12 +84,25 @@ function submitLink(eventId) {
         .then((result) => {
             console.log(result);
             if (result.status == 200) {
-                document.getElementById(`upload-${eventId}`).style = 'display: none;';
-                document.getElementById(`uploaded-${eventId}`).style = 'display: block;';
-                document.getElementById(`uploaded-${eventId}`).innerHTML = `<strong><a href="${submissions[eventId].file}" style="text-decoration:none;">View your submission</a></strong>`;
+                swal({
+                title: "Submitted Successfully!",
+                icon: "success",
+                buttons: true,
+                dangerMode: true,
+              })
+              .then((release) => {
                 location.reload();
+              });
             } else {
-                alert(result.message);
+                swal({
+                title: "Error while submitting!",
+                text: result.message,
+                icon: "warning",
+                dangerMode: true,
+              })
+              .then((release) => {
+                location.reload();
+              });
             }
         })
         .catch((err) => console.error(err));
@@ -105,7 +117,6 @@ function submitFile(eventId) {
     fetch(`${backendUrl}/api/events/submit/`, {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/json',
             'Authorization': `Token ${getCookie('token')}`
         },
         'body': formData
@@ -114,14 +125,36 @@ function submitFile(eventId) {
         .then((result) => {
             console.log(result);
             if (result.status == 200) {
-                document.getElementById(`upload-${eventId}`).style = 'display: none;';
-                document.getElementById(`uploaded-${eventId}`).style = 'display: block;';
-                document.getElementById(`uploaded-${eventId}`).innerHTML = `<strong><a href="${submissions[eventId].file}" style="text-decoration:none;">View your submission</a></strong>`;
-                location.reload();
+                swal({
+                    title: "Uploaded Successfully!",
+                    icon: "success"
+                  })
+                  .then((release) => {
+                    location.reload();
+                  });
+                // location.reload();
             } else {
-                alert(result.message);
+                swal({
+                title: "Error while uploading!",
+                text: result.message,
+                icon: "warning",
+                dangerMode: true,
+              })
+              .then((release) => {
+                location.reload();
+              });
             }
-        }).catch((err) => alert(err));
+        }).catch((err) => {
+            swal({
+                title: "Client error while submitting!",
+                text: err,
+                icon: "warning",
+                dangerMode: true,
+              })
+              .then((release) => {
+                location.reload();
+              });
+        });
 
 }
 

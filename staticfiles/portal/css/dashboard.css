@@ -113,15 +113,15 @@ body {
 }
 .card .submission {
   padding-top: 15px;
+  padding-bottom: 15px;
   margin: 10px;
   text-align: center;
   border: 1px dashed white;
-  height: 70px;
+
 }
 .card .submission a {
   font-size: 15px;
   display: block;
-  transform: translateY(50%);
   text-decoration: none;
   color: red;
 }
@@ -159,17 +159,34 @@ body {
   width: 40vw;
 }
 
-.card .submission-alert {
-  width: 80vw;
-  font-weight: 400;
-  border: 1px solid red;
-  padding: 10px;
-}
-
 .card .submit-alert{
   height: auto;
   font-size: 15px;
   font-weight: 500;
   border: 1px dashed red;
   padding: 20px;
+}
+
+
+@media screen and (max-width:1024px) and (min-width:200px){
+  .navig #username{
+    font-size:4vw;
+  }
+  #title{
+    font-size:8vw;
+  }
+  .left{
+    font-size:2vw;
+  }
+  .left h2,.right h2{
+    font-size:4vw;
+  }
+  .right{
+    font-size:4vw;
+  }
+  .card .submission #file {
+    width:50vw;
+    padding-bottom: 1vw;
+
+  }
 }

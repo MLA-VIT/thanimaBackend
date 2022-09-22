@@ -43,7 +43,8 @@ class CreateSubmissionView(generics.GenericAPIView):
         ext = file.name.split('.')[-1]
         filename = f"{filename}.{ext}"
         if ext.upper() in accepted_formats:
-            file_save = default_storage.save(f'file_uploads/{filename}', file)
+            file_save = default_storage.save(f'{filename}', file)
+            print(file_save)
             filename = "submissions/" + file_save.split('/')[-1]
             result = storage.child(filename).put(file_save)
             url = storage.child(filename).get_url(None)
@@ -54,12 +55,16 @@ class CreateSubmissionView(generics.GenericAPIView):
 
     def post(self, request,*args, **kwargs):
         participant = Participant.objects.get(user_id = request.user.id)
+        print('hellooo')
+        print(request.POST)
         event = Event.objects.get(id=request.data['event_id'])
+        print('hellooo')
         if event.deadline: # Check Deadline
             if timezone.now() > event.deadline:
                 raise Exception(422, "deadline passed for submission.")
         if event.file_submission: # File Submission
             file = request.FILES.get('file', None)
+            print(file)
             if file is None:
                 raise Exception(422, "file submission expected, but not received.")
             url = self.submit_file(file, f"{event.id}_{request.user.reg_no}", event.accepted_formats)
