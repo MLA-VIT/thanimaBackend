@@ -51,7 +51,7 @@ class CustomRegisterSerializer(serializers.Serializer):
         if(reg_no is not None and re.search(reg_no_rx, reg_no) is None):
             raise Exception(422, 'Invalid reg no.')
         if(password is not None and re.search(pass_rx,password) is None):
-            raise Exception(422, 'Invalid password')
+            raise Exception(422, 'Password should contain a lowercase, an uppercase character, a number, and a special character.')
         if(email is not None and re.search(email_rx, email) is None):
             raise Exception(422, 'Invalid VIT Mail ID.')
         if(contact and len(str(contact)) < 10):
