@@ -94,7 +94,7 @@ class ProfileView(generics.GenericAPIView):
     serializer_class = EventSerializer
     renderer_classes = [TemplateHTMLRenderer]
     # permission_classes = [IsAuthenticated]
-    template_name = 'portal/portal.html'
+    template_name = 'portal/dashboard.html'
 
     def get(self, request):
         events = Event.objects.all()
@@ -106,6 +106,10 @@ class MyProfileView(generics.GenericAPIView):
 
     def get(self, request, *args, **kwargs):
         events = Event.objects.all()
+        profile = {
+            'name':request.user.full_name,
+            'reg_no':request.user.reg_no
+        }
         participant = Participant.objects.get(user_id=request.user.id)
         submissions = Submission.objects.filter(participant_id=participant.participant_id)
-        return GenericResponse('success', {'events':EventSerializer(events, many=True).data, 'submissions':SubmissionSerializer(submissions, many=True).data})
+        return GenericResponse('success', {'profile':profile, 'events':EventSerializer(events, many=True).data, 'submissions':SubmissionSerializer(submissions, many=True).data})

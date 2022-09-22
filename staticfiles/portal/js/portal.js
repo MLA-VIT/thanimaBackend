@@ -23,45 +23,44 @@ if(getCookie('token') == "") {
 
 function renderContestDiv(event) {
     var output =
-        `<div class="panel panel-warning">
-        <div class="panel-heading">
-            <h3>${event.name} | ${event.subname}</h3>
-        </div>`;
-    if (event.prize_reveal) {
-        output += `
-        <div class="well well-sm">Prizes Worth:<br><span class="badge">1st</span> ${event.prize_1}<br><span
-                class="badge">2nd</span> ${event.prize_2}<br><span class="badge">3rd</span> ${event.prize_3}</div>`;
-    }
+        `<div class="card">
+        <h2>${event.name}</h2>
+        <h3>${event.subname}</h3>`;
     var deadline = new Date(event.deadline);
     output +=
-        `<div class="panel-body">
-        ${event.rules}<br><br>
-        ${event.judging_criteria}
-        </div>
-        <div class="panel-footer">Last date for submission: ${deadline}</div>`;
+        `${event.rules}<br><br>
+        ${event.judging_criteria}<div class="date-submit">
+        <div class="left"><span class="status-title">Last day for submission</span>
+            <h2>${deadline.toLocaleDateString("en-IN")}</h2></div>`;
+        if(deadline < Date.now()) {
+            output += `<div class="right"><span class="status-title">Submissions</span>
+            <h2 class="closed">CLOSED</h2></div></div>`; 
+        } else {
+            output += `<div class="right"><span class="status-title">Submissions</span>
+            <h2 class="open">OPEN</h2></div></div>`;
+        }
     if (submissions[event.id]) {//already submitted
-        output += `<div class="alert alert-success" id="uploaded-${event.id}"><strong><a href="${submissions[event.id]}" style="text-decoration:none;" target="_blank">View your submission</a></strong></div>`;
-    } else if (deadline < Date.now()) {//deadline passed
-        output +=
-            `<div class="panel-footer">
-                <div class="alert alert-danger">Submission Closed.</div>
+        output += `<div class="submission" id="uploaded-${event.id}">
+                    <a href="${submissions[event.id].file}" target="_blank">VIEW YOUR SUBMISSION</a>
                 </div>`;
-    } else {//can submit
+    } else if(deadline >= Date.now()){//can submit
         if (event.file_submission) {
             output +=
-                `<div class="alert alert-success" id="upload-${event.id}">
-            <strong>Upload Image:</strong> (Maximum File Size 3MB)</div>
-            <input type="file" name="file" id="file-${event.id}">
-            <button onclick="submitFile(${event.id})" id="file-upload">Upload File</button>`;
+                `<div class="submission">
+                <input type="file" name="file" id="file-${event.id}">
+                <button type="button" onclick="submitFile(${event.id})">Submit</button>
+            </div>`;
         } else {
             output +=
-                `<div class="alert alert-warning"><strong>Upload your video in Google Drive (without any restriction - Edit the permission to "Anyone with the link can view") and paste the link below. Only the first link uploaded will be considered. So please be careful while uploading.</strong></div>
-            <div id="upload-${event.id}">
-            <div class="alert alert-success"><strong>Upload Video Link</strong></div>
-            <input type="text" name="file" id="file-${event.id}">
-            <button type="submit" onclick="submitLink(${event.id})" value="Upload Video Link">Upload Video Link</button></div>`;
+                `
+                <div class="submission" id="upload-${event.id}">
+                <div class="submit-alert submission" >Upload your video in Google Drive (without any restriction -
+                    Edit the permission to "Anyone with the link can view") and paste the link below. Only the first
+                    link uploaded will be considered. So please be careful while uploading.</div>
+                <input type="text" name="file" id="file-${event.id}" placeholder="File Hosted Link">
+                <button type="button" onclick="submitLink(${event.id})">Submit</button>
+            </div>`;
         }
-        output += `<div class="alert alert-success" id="uploaded-${event.id}" style="display:none;"><strong><a href="" style="text-decoration:none;" target="_blank">View your submission</a></strong></div>`;
     }
     output += `</div>`;
     return output;
@@ -88,6 +87,7 @@ function submitLink(eventId) {
                 document.getElementById(`upload-${eventId}`).style = 'display: none;';
                 document.getElementById(`uploaded-${eventId}`).style = 'display: block;';
                 document.getElementById(`uploaded-${eventId}`).innerHTML = `<strong><a href="${submissions[eventId].file}" style="text-decoration:none;">View your submission</a></strong>`;
+                location.reload();
             } else {
                 alert(result.message);
             }
@@ -116,10 +116,11 @@ function submitFile(eventId) {
                 document.getElementById(`upload-${eventId}`).style = 'display: none;';
                 document.getElementById(`uploaded-${eventId}`).style = 'display: block;';
                 document.getElementById(`uploaded-${eventId}`).innerHTML = `<strong><a href="${submissions[eventId].file}" style="text-decoration:none;">View your submission</a></strong>`;
+                location.reload();
             } else {
                 alert(result.message);
             }
-        })
+        }).catch((err) => alert(err));
 
 }
 
@@ -142,6 +143,7 @@ function loadProfile() {
                 var contestsElement = document.getElementById('contests');
                 contestsElement.innerHTML += element;
             }
+            document.getElementById('username').innerHTML = `${response.data.profile.name.toUpperCase()}, ${response.data.profile.reg_no.toUpperCase()}`;
         })
         .catch((err) => {
             console.error(err);

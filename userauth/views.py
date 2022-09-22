@@ -21,7 +21,7 @@ class RootView(APIView):
 
     def get_template(self):
         if(self.request.user.is_authenticated):
-            return 'portal/portal.html'
+            return 'portal/dashboard.html'
         else:
             return 'portal/login.html'
     
