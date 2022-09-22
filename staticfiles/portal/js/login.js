@@ -8,6 +8,22 @@ function setCookie(cname, cvalue, exdays) {
   document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
 }
 
+function getCookie(cname) {
+  let name = cname + "=";
+  let decodedCookie = decodeURIComponent(document.cookie);
+  let ca = decodedCookie.split(';');
+  for (let i = 0; i < ca.length; i++) {
+      let c = ca[i];
+      while (c.charAt(0) == ' ') {
+          c = c.substring(1);
+      }
+      if (c.indexOf(name) == 0) {
+          return c.substring(name.length, c.length);
+      }
+  }
+  return "";
+}
+
 function register() {
   var email = jQuery('#email').val();
   var contact = jQuery('#phone').val();
@@ -46,7 +62,7 @@ function register() {
   })
 }
 
-function login() {
+function letMeIn() {
   var email = document.getElementById('loginMail').value;
   var password = document.getElementById('loginPassword').value;
   console.log(email, password);
@@ -71,7 +87,11 @@ function login() {
     } else {
       alert(result.message);
     }
-  })
+  });
+}
+
+if(getCookie('token') != "") {
+  window.location.replace(`http://${window.location.host}/profile/`);
 }
 
 $(document).ready(function () {

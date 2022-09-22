@@ -17,6 +17,10 @@ function getCookie(cname) {
     return "";
 }
 
+if(getCookie('token') == "") {
+    window.location.replace(`http://${window.location.host}/`);
+  }
+
 function renderContestDiv(event) {
     var output =
         `<div class="panel panel-warning">
