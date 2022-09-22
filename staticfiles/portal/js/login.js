@@ -1,5 +1,5 @@
 /*global $, document, window, setTimeout, navigator, console, location*/
-var backendUrl = 'http://localhost:8000';
+var backendUrl = 'https://thanima-backend.herokuapp.com';
 
 function setCookie(cname, cvalue, exdays) {
   const d = new Date();
