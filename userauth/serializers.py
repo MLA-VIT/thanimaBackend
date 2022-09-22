@@ -99,7 +99,6 @@ class OTPSerializer(serializers.Serializer):
             last_id = int(last.split('P'))
             pid = 'TMAP' + str(last_id+1).zfill(4)
         participant = Participant(user=user,participant_id=pid,reg_no=user.reg_no)
-        print(participant)
         participant.save()
 
     def _validate_otp(self, otp, email):
@@ -113,6 +112,7 @@ class OTPSerializer(serializers.Serializer):
                 if(user.otp == otp):
                     if(user.email_verified == False):
                         user.email_verified = True
+                        user.reg_complete = True
                         user.save()
                         # Create Participant Automatically
                         self.create_participant(user)

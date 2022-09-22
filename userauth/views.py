@@ -2,15 +2,31 @@ from uuid import uuid4
 from dj_rest_auth.views import LoginView
 from dj_rest_auth.models import get_token_model
 from dj_rest_auth.utils import jwt_encode
+from rest_framework.response import Response
 from dj_rest_auth.app_settings import create_token
 from rest_framework import generics
 from django.core.mail import send_mail
 from django.contrib.auth.hashers import make_password
 from thanimaBackend.helpers import GenericResponse
 from userauth.utils import otp_msg, create_otp
+from rest_framework.renderers import TemplateHTMLRenderer
 from datetime import timedelta
 from django.conf import settings
 from userauth.serializers import *
+from rest_framework.views import APIView
+
+class RootView(APIView):
+    renderer_classes = [TemplateHTMLRenderer]
+    template_name = 'portal/login.html'
+
+    def get_template(self):
+        if(self.request.user.is_authenticated):
+            return 'portal/portal.html'
+        else:
+            return 'portal/login.html'
+    
+    def get(self, request, *args, **kwargs):
+        return Response({})
 
 class CustomRegisterView(generics.GenericAPIView):
     serializer_class = CustomRegisterSerializer
@@ -73,7 +89,7 @@ class CustomLoginView(LoginView):
     def get_response(self):
         response = super().get_response()
         if response is not None:
-            return GenericResponse(response.data, "Success")
+            return GenericResponse("Success", response.data)
         else:
             raise Exception(500, 'failed to create response')
 

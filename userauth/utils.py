@@ -50,7 +50,7 @@ def exc_handler(exc, context):
     except Exception as e:
         message = str(exc)
     print(traceback.print_exc())
-    return GenericResponse('Error',{
+    return GenericResponse(message,{
         'message':message,
         'detail':detail
     }, status=status)

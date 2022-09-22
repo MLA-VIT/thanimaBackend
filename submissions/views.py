@@ -4,7 +4,7 @@ from rest_framework import generics
 from .serializers import *
 from .models import Event
 from .models import Participant
-from datetime import datetime
+from django.utils import timezone
 from rest_framework.permissions import *
 from django.shortcuts import render, redirect
 from django.shortcuts import render
@@ -12,6 +12,8 @@ from django.conf import settings
 from django.core.files.storage import default_storage
 from django.contrib import messages
 import pyrebase
+from rest_framework.renderers import TemplateHTMLRenderer
+from rest_framework.response import Response
 
 firebase = pyrebase.initialize_app(settings.FIREBASE_CONFIG)
 storage = firebase.storage()
@@ -54,7 +56,7 @@ class CreateSubmissionView(generics.GenericAPIView):
         participant = Participant.objects.get(user_id = request.user.id)
         event = Event.objects.get(id=request.data['event_id'])
         if event.deadline: # Check Deadline
-            if datetime.now() > event.deadline:
+            if timezone.now() > event.deadline:
                 raise Exception(422, "deadline passed for submission.")
         if event.file_submission: # File Submission
             file = request.FILES.get('file', None)
@@ -87,3 +89,23 @@ class GetSubmissionsView(generics.ListAPIView):
     def post(self, request,*args, **kwargs):
         response = super().list(self, request, *args, **kwargs)
         return GenericResponse("success",response.data)
+
+class ProfileView(generics.GenericAPIView):
+    serializer_class = EventSerializer
+    renderer_classes = [TemplateHTMLRenderer]
+    # permission_classes = [IsAuthenticated]
+    template_name = 'portal/portal.html'
+
+    def get(self, request):
+        events = Event.objects.all()
+        return Response({'events': events})
+
+class MyProfileView(generics.GenericAPIView):
+    serializer_class = EventSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        events = Event.objects.all()
+        participant = Participant.objects.get(user_id=request.user.id)
+        submissions = Submission.objects.filter(participant_id=participant.participant_id)
+        return GenericResponse('success', {'events':EventSerializer(events, many=True).data, 'submissions':SubmissionSerializer(submissions, many=True).data})
