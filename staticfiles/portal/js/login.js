@@ -85,7 +85,7 @@ function letMeIn() {
       setCookie("token",result.data.key, 3);
       window.location.replace(`http://${window.location.host}/profile/`);
     } else {
-      alert(result.message);
+      alert('Invalid Login Credentials');
     }
   });
 }
