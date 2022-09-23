@@ -1,6 +1,6 @@
 /*global $, document, window, setTimeout, navigator, console, location*/
-// var backendUrl = 'https://thanima-backend.herokuapp.com';
-var backendUrl = 'http://localhost:8000';
+var backendUrl = 'https://thanima-backend.herokuapp.com';
+// var backendUrl = 'http://localhost:8000';
 function setCookie(cname, cvalue, exdays) {
   const d = new Date();
   d.setTime(d.getTime() + (exdays*24*60*60*1000));
@@ -90,7 +90,7 @@ function letMeIn() {
   });
 }
 
-if(getCookie('token') != "") {
+if(getCookie('token') != "" && getCookie('token') != 'undefined') {
   window.location.replace(`http://${window.location.host}/profile/`);
 }
 

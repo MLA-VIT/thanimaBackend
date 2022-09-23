@@ -1,5 +1,5 @@
-// var backendUrl = 'https://thanima-backend.herokuapp.com';
-var backendUrl = 'http://localhost:8000';
+var backendUrl = 'https://thanima-backend.herokuapp.com';
+// var backendUrl = 'http://localhost:8000';
 var submissions = {};
 
 function getCookie(cname) {
@@ -18,7 +18,7 @@ function getCookie(cname) {
     return "";
 }
 
-if(getCookie('token') == "") {
+if(getCookie('token') == "" || getCookie('token') == 'undefined') {
     window.location.replace(`http://${window.location.host}/`);
   }
 
