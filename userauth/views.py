@@ -66,7 +66,7 @@ class CustomRegisterView(generics.GenericAPIView):
             else:
                 user = user_data.save(otp=otp, otp_validity=otp_validity, password=make_password(password))
                 self.create_participant(user)
-            send_mail('Verification Mail for Thanima Portal', otp_msg(otp), None, recipient_list=[email], fail_silently=True)
+            # send_mail('Verification Mail for Thanima Portal', otp_msg(otp), None, recipient_list=[email], fail_silently=True)
             return GenericResponse('Registered. OTP Sent.','Success')
 
 class OTPVerifyView(LoginView):
