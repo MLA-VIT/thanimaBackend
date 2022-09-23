@@ -83,7 +83,7 @@ function letMeIn() {
     console.log(result);
     if(result.status == 200) {
       setCookie("token",result.data.key, 3);
-      window.location.replace(`http://${window.location.host}/profile/`);
+      window.location.replace(`https://${window.location.host}/profile/`);
     } else {
       alert('Invalid Login Credentials');
     }
@@ -91,7 +91,7 @@ function letMeIn() {
 }
 
 if(getCookie('token') != "" && getCookie('token') != 'undefined') {
-  window.location.replace(`http://${window.location.host}/profile/`);
+  window.location.replace(`https://${window.location.host}/profile/`);
 }
 
 $(document).ready(function () {

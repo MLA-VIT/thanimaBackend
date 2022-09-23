@@ -19,7 +19,7 @@ function getCookie(cname) {
 }
 
 if(getCookie('token') == "" || getCookie('token') == 'undefined') {
-    window.location.replace(`http://${window.location.host}/`);
+    window.location.replace(`https://${window.location.host}/`);
   }
 
 function renderContestDiv(event) {
