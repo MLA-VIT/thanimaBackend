@@ -44,7 +44,6 @@ class CreateSubmissionView(generics.GenericAPIView):
         filename = f"{filename}.{ext}"
         if ext.upper() in accepted_formats:
             file_save = default_storage.save(f'{filename}', file)
-            print(file_save)
             filename = "submissions/" + file_save.split('/')[-1]
             result = storage.child(filename).put(file_save)
             url = storage.child(filename).get_url(None)

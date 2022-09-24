@@ -4,6 +4,7 @@ from django.contrib.auth import get_user_model
 from django.utils.translation import gettext_lazy as _
 from dj_rest_auth.serializers import LoginSerializer
 from datetime import datetime
+from .models import Registration
 import re
 
 from submissions.models import Participant
@@ -130,3 +131,8 @@ class OTPSerializer(serializers.Serializer):
         user = self._validate_otp(otp, email)
         attrs['user'] = user
         return attrs
+
+class RegistrationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Registration
+        fields = '__all__'

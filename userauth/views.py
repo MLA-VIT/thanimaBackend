@@ -7,6 +7,7 @@ from dj_rest_auth.app_settings import create_token
 from rest_framework import generics
 from django.core.mail import send_mail
 from django.contrib.auth.hashers import make_password
+from submissions.serializers import SubmissionSerializer
 from thanimaBackend.helpers import GenericResponse
 from userauth.utils import otp_msg, create_otp
 from rest_framework.renderers import TemplateHTMLRenderer
@@ -14,6 +15,10 @@ from datetime import timedelta
 from django.conf import settings
 from userauth.serializers import *
 from rest_framework.views import APIView
+from rest_framework.permissions import IsAdminUser
+from pathlib import Path
+from openpyxl import *
+from django.core.files.storage import default_storage
 
 class RootView(APIView):
     renderer_classes = [TemplateHTMLRenderer]
@@ -181,3 +186,40 @@ class ForgotPasswordView(generics.GenericAPIView):
                 raise Exception(400, 'OTP expired', 'request OTP again.')
         else:
             raise Exception(422, 'passwords do not match.')
+
+class UploadRegistrations(generics.GenericAPIView):
+    serializer_class = RegistrationSerializer
+    permission_classes = [IsAdminUser]
+
+    def post(self, request, *args, **kwargs):
+        file = request.FILES.get('file', None)
+        if file is None:
+                raise Exception(400, "file not passed")
+        ext = file.name.split('.')[-1]
+        if(ext in ['xls','xlsx']):
+            filename = f"{uuid4()}.{ext}"
+            dirr = default_storage.save(filename, file)
+            wb = load_workbook(dirr)
+            registrations = []
+            for sheet in wb:
+                for row in sheet.iter_rows(min_row=1, max_col=5, max_row=2000, values_only=True):
+                    if not row[0]:
+                        break
+                    if str(row[1]) == 'Name':
+                        continue
+                    receipt = row[0]
+                    name = row[1]
+                    reg_no = row[2]
+                    email = row[3]
+                    contact = row[4]
+                    if(len(reg_no) >= 10):
+                        reg_no = reg_no.replace(' ', '')
+                    # if(len(str(contact)) >= 10):
+                    #     contact = str(contact).replace(' ', '')
+                    # print(name, reg_no, email, contact)
+                    registration = Registration(receipt=receipt, name=name, reg_no=reg_no, email=email, mobile_no=contact)
+                    registrations.append(registration)
+            Registration.objects.bulk_create(registrations, ignore_conflicts=True)
+            return GenericResponse("created users", "Success")
+        else:
+            raise Exception(400, "Invalid file")

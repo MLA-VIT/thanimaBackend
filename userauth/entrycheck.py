@@ -2,7 +2,7 @@ from rest_framework import generics
 from thanimaBackend.helpers import GenericResponse
 from rest_framework.permissions import IsAdminUser
 from django.contrib.auth import get_user_model
-
+from userauth.models import Registration
 
 class EntryCheckView(generics.GenericAPIView):
     permission_classes=[IsAdminUser]
@@ -12,8 +12,8 @@ class EntryCheckView(generics.GenericAPIView):
         if reg_no is None:
             raise Exception(422,"Please provide Registration Number")
         try:
-            user = get_user_model().objects.get(reg_no=reg_no)
-            return GenericResponse("",{"entry": True})
+            user = Registration.objects.get(reg_no=reg_no)
+            return GenericResponse("Entry Accepted",{"entry": True})
 
         except Exception as e:
             return GenericResponse("",{"entry": False})
@@ -24,17 +24,15 @@ class HadFood(generics.GenericAPIView):
         if reg_no is None:
             raise Exception(422,"Please provide Registration Number")
         try:
-            user = get_user_model().objects.get(reg_no=reg_no)
-            if user.payment_done == True:
-                if user.had_food == False:
-                    user.had_food = True
-                    user.save()
+            registration = Registration.objects.get(reg_no=reg_no)
+            if registration.payment_done == True:
+                if registration.had_food == False:
+                    registration.had_food = True
+                    registration.save()
                     return GenericResponse("Entry Accepted",{"entry": True})
                 else:
                     return GenericResponse("Had food",{"entry":False})
-                
             else:
                 return GenericResponse("Payment not done",{"entry": False})
-
         except Exception as e:
-            return GenericResponse("Not registered in portal",{"entry": False})
+            return GenericResponse("Not registered in VIT portal",{"entry": False})

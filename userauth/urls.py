@@ -11,5 +11,6 @@ urlpatterns = [
     path('verify-forgot-password-otp/', VerifyForgotPasswordOTP.as_view()),
     path('update-password/', ForgotPasswordView.as_view()),
     path('entry/',EntryCheckView.as_view()),
-    path('sadhya/',HadFood.as_view())
+    path('sadhya/',HadFood.as_view()),
+    path('vtop-regns/', UploadRegistrations.as_view())
 ]
