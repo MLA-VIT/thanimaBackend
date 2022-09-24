@@ -220,6 +220,7 @@ class UploadRegistrations(generics.GenericAPIView):
                     registration = Registration(receipt=receipt, name=name, reg_no=reg_no, email=email, mobile_no=contact)
                     registrations.append(registration)
             Registration.objects.bulk_create(registrations, ignore_conflicts=True)
+            delete = default_storage.delete(dirr)
             return GenericResponse("created users", "Success")
         else:
             raise Exception(400, "Invalid file")
